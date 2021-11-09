@@ -13,17 +13,23 @@ endif::[]
 
 The main difference with ECS is that the Component and System concepts are merged into the Manager.
 
+See link:src[].
+
 == Concept
 
 === Entity
 
-An entity is a table which is a set of managers defining a composition. It also has some methods and will free itself from managers on garbage collection.
+An entity is a table which is a set of managers, defining a composition. It also has some methods and will free itself from managers on garbage collection.
 
 Operations and data are not owned by an entity; its role is to bind managers to an object with automatic memory management.
 
 === Manager
 
 A manager can be anything implementing the manager interface (methods). It defines and manages a component for the entities.
+
+Operations can be implemented by managers, maybe depending on other managers, or functions processing entities and multiple managers, etc.
+
+WARNING: To ensure proper garbage collection, `init()` / `free()` should be called from the entity and the manager must not have a strong reference to entities just to manage the internal data.
 
 == API
 
@@ -48,8 +54,8 @@ entity:has(manager)
 
 -- Manager interface, called by corresponding entity methods.
 
-manager:init(entity, ...)
-manager:free(entity)
+manager:__init(entity, ...)
+manager:__free(entity)
 ----
 
 .Getting managers from an entity.

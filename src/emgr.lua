@@ -24,6 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
+local lua51 = string.find(_VERSION, "5.1")
+
 local emgr = {}
 
 local entity = {}
@@ -31,14 +33,14 @@ local entity = {}
 -- Initialize the entity into a manager.
 -- Can be called even if already initialized.
 function entity:init(manager, ...)
-  manager:init(self, ...)
+  manager:__init(self, ...)
   self[manager] = true
 end
 
 -- Free the entity from a manager.
 -- Can be called even if already freed.
 function entity:free(manager)
-  manager:free(self)
+  manager:__free(self)
   self[manager] = nil
 end
 
@@ -50,12 +52,19 @@ function entity:has(manager)
 end
 
 local function entity_gc(self)
-  for manager in pairs(self) do manager:free(self) end
+  for manager in pairs(self) do manager:__free(self) end
 end
+
+local entity_mt = {__index = entity, __gc = entity_gc}
 
 -- Create an entity.
 function emgr.entity()
-  return setmetatable({}, {__index = entity, __gc = entity_gc})
+  if lua51 then
+    local proxy = newproxy(true)
+    local e = setmetatable({}, {__index = entity, proxy = proxy})
+    getmetatable(proxy).__gc = function() entity_gc(e) end
+    return e
+  else return setmetatable({}, entity_mt) end
 end
 
 return emgr
