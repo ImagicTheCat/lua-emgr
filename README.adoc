@@ -1,0 +1,61 @@
+= emgr
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+:toc: left
+:toclevels: 5
+
+*emgr*, or Entity Manager, is a simple Lua library which implements a paradigm similar to **E**ntity **C**omponent **S**ystem (ECS).
+
+The main difference with ECS is that the Component and System concepts are merged into the Manager.
+
+== Concept
+
+=== Entity
+
+An entity is a table which is a set of managers defining a composition. It also has some methods and will free itself from managers on garbage collection.
+
+Operations and data are not owned by an entity; its role is to bind managers to an object with automatic memory management.
+
+=== Manager
+
+A manager can be anything implementing the manager interface (methods). It defines and manages a component for the entities.
+
+== API
+
+[source, lua]
+----
+-- Create an entity.
+emgr.entity()
+
+-- Entity.
+
+-- Initialize the entity into a manager.
+-- Can be called even if already initialized.
+entity:init(manager, ...)
+
+-- Free the entity from a manager.
+-- Can be called even if already freed.
+entity:free(manager)
+
+-- Check if the entity has a manager as composition (i.e. is managed by a manager).
+-- Low-level alternative: check `entity[manager]`
+entity:has(manager)
+
+-- Manager interface, called by corresponding entity methods.
+
+manager:init(entity, ...)
+manager:free(entity)
+----
+
+.Getting managers from an entity.
+====
+[source, lua]
+----
+for manager in pairs(entity) do ... end
+----
+====
